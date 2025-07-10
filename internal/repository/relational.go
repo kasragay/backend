@@ -93,7 +93,7 @@ func (s *Relational) TODO_DELETE_AddFirstUsers() error {
 		context.Background(),
 		&ports.AuthSignupPostRequest{
 			Name:        "Amir Hossein Pakdaman",
-			PhoneNumber: "09202400120",
+			PhoneNumber: "+989202400120",
 			UserType:    ports.AdminUserType,
 			Password:    "P@ssw0rdUnhackable",
 		}, uuid.MustParse("89950e97-6b0f-4ef4-977a-8378b14bc4a7"),
@@ -105,7 +105,7 @@ func (s *Relational) TODO_DELETE_AddFirstUsers() error {
 		context.Background(),
 		&ports.AuthSignupPostRequest{
 			Name:        "Amir Hossein Pakdaman",
-			PhoneNumber: "09202400120",
+			PhoneNumber: "+989202400120",
 			UserType:    ports.ClientUserType,
 			Password:    "P@ssw0rdUnhackable",
 		}, uuid.MustParse("779033a2-4eaa-4817-aa81-24e24bd419f5"),

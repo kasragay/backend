@@ -103,10 +103,7 @@ func usernameValidator(fl validator.FieldLevel) bool {
 }
 
 func PhoneValidator(phone string) bool {
-	if len(phone) != 11 {
-		return false
-	}
-	pattern := `^0\d{10}$`
+	pattern := `^\+[1-9]\d{10,14}$`
 	matched, err := regexp.MatchString(pattern, phone)
 	if err != nil {
 		return false
