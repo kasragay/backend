@@ -2,6 +2,34 @@ openapi: 3.1.0
 info:
   title: Kasragay API
   description: |-
+    <div style="display: flex; align-items: flex-end; margin-bottom: 20px">
+      <img src="https://api.kasragay.com/v1/assets/logo150x150.png" alt="Kasragay Logo" style="width: 50px; height: 50px; margin-right: 10px;">
+      <h1 style="position: relative; top: 16px;">Kasragay Frontend</h1>
+    </div>
+
+    ---
+
+    ## This foundation is inspired by Kasra's gayness
+
+    [![Website](https://img.shields.io/badge/Website-kasragay.com-blue.svg)](https://kasragay.com/) [![API](https://img.shields.io/badge/API-api.kasragay.com-green.svg)](https://api.kasragay.com)
+
+    [![Github](https://img.shields.io/badge/Github-kasra__gay-black.svg)](https://github.com/kasragay) [![Telegram](https://img.shields.io/badge/Telegram-kasra__gay-0088cc.svg)](https://t.me/kasra_gay) [![Discord](https://img.shields.io/badge/Discord-PghhrARr-5865F2.svg)](https://discord.gg/PghhrARr)
+
+    [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+
+    ---
+
+    ## Docs
+    [![V1 Swagger Doc](https://img.shields.io/badge/V1-Doc-green)](https://api.kasragay.com/v1)
+
+    ---
+
+    ## How to Use?
+    **Just do** `ssh kasragay.com` **to try it out.**
+
+    ---
+
+    
     ## Notes 
     ---
     - **+989202400120** phone number is signed up by default as admin, and client.

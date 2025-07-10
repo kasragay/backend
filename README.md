@@ -8,19 +8,21 @@
 ## This foundation is inspired by Kasra's gayness
 
 [![Website](https://img.shields.io/badge/Website-kasragay.com-blue.svg)](https://kasragay.com/) [![API](https://img.shields.io/badge/API-api.kasragay.com-green.svg)](https://api.kasragay.com)
-[![Telegram](https://img.shields.io/badge/Telegram-kasra__gay-0088cc.svg)](https://t.me/kasra_gay) [![Discord](https://img.shields.io/badge/Discord-kasragay-5865F2.svg)](https://discord.gg/PghhrARr)
+
+[![Telegram](https://img.shields.io/badge/Telegram-kasra__gay-0088cc.svg)](https://t.me/kasra_gay) [![Discord](https://img.shields.io/badge/Discord-PghhrARr-5865F2.svg)](https://discord.gg/PghhrARr)
 
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+
+---
+
+## Docs
+[![V1 Swagger Doc](https://img.shields.io/badge/V1-Doc-green)](https://api.kasragay.com/v1)
 
 ---
 
 ## How to Use?
 **Just do** `ssh kasragay.com` **to try it out.**
 
----
-
-## Docs
-[![V1 Swagger Doc](https://img.shields.io/badge/V1-Doc-green)](https://api.kasragay.com/v1)
 
 ---
 
