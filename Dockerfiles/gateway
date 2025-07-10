@@ -1,0 +1,25 @@
+FROM golang:1.24-alpine AS build
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY cmd/gateway ./cmd
+COPY internal ./internal
+
+RUN go build -o bin/app cmd/main.go
+
+FROM alpine:3.20.1 AS prod
+
+RUN apk add --no-cache curl
+RUN apk add --no-cache tzdata
+WORKDIR /app
+
+COPY docs ./docs
+COPY assets ./assets
+COPY templates ./templates
+COPY --from=build /app/bin/app /app/bin/app
+
+EXPOSE ${GATEWAY_PORT}
+
+CMD ["./bin/app"]

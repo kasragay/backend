@@ -1,0 +1,2096 @@
+openapi: 3.1.0
+info:
+  title: Kasragay API
+  description: |-
+    ## Notes 
+    ---
+    - **09202400120** phone number is signed up by default as admin, and client.
+      - **Admin ID** 89950e97-6b0f-4ef4-977a-8378b14bc4a7
+      - **Client ID** 779033a2-4eaa-4817-aa81-24e24bd419f5
+    - **09202400120-9** phone numbers are by-passed and available for testing.
+
+    ### Logs
+    ---
+    **2025-07-09**
+    - Initial commit
+  version: 1.0.0
+servers:
+  - url: https://api.kasragay.com/v1
+    description: API Server
+tags:
+  - name: auth
+    description: Authentication Service
+  - name: s3
+    description: S3 Service
+  - name: user
+    description: User Service
+  - name: admin
+    description: User Service
+  - name: client
+    description: User Service
+paths:
+  /auth/check:
+    get:
+      tags:
+        - auth
+      summary: Checks user is already registered or not (10 r/m)
+      description: Checks Whether the provided identity is already registered or not
+      parameters:
+        - name: username
+          in: query
+          required: true
+          description: Username to check
+          schema:
+            type: string
+            example: "Kasra"
+            pattern: ^(?!.*\.\.)[a-zA-Z0-9\-_]+(\.[a-zA-Z0-9\-_]+)*$
+            minLength: 3
+            maxLength: 64
+        - name: user_type
+          in: query
+          required: true
+          description: User Type to check
+          schema:
+            type: string
+            example: "client"
+            enum: [client, admin]
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthCheckPostResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        "403":
+          description: Invalid Host
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidHostResponse"
+        "415":
+          description: Unsupported media type
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnsupportedMediaTypeResponse"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TooManyRequestsResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+  /auth/signup/key:
+    get:
+      tags:
+        - auth
+      summary: Send Key (3 r/m)
+      description: Send an Key to user's phone number
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: email
+          in: query
+          description: Email of user
+          required: false
+          schema:
+            type: string
+            example: "amirhossein.pdn@gmail.com"
+            format: email
+        - name: phone_number
+          in: query
+          description: Phone number of user
+          required: false
+          schema:
+            type: string
+            example: "09202400120"
+            pattern: ^0\d{10}$
+        - name: user_type
+          in: query
+          description: User Type of user
+          required: true
+          schema:
+            type: string
+            example: "admin"
+            enum: [admin]
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JwtUnauthorizedResponse"
+        "403":
+          description: Invalid Host
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidHostResponse"
+        "409":
+          description: Username already exists Or PhoneNumber Or Email is taken by multiple users
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/UsernameAlreadyExistsResponse"
+                  - $ref: "#/components/schemas/EmailIsTakenByMultipleResponse"
+                  - $ref: "#/components/schemas/PhoneNumberIsTakenByMultipleResponse"
+        "410":
+          description: User has been deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDeletedResponse"
+        "429":
+          description: Too Early Or Too many requests
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/AuthMethodOtpGetTooEarlyResponse"
+                  - $ref: "#/components/schemas/TooManyRequestsResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+  /auth/tmp/signup/key:
+    get:
+      tags:
+        - auth
+      summary: Get Send Key (3 r/m)
+      description: Get send an Key to user's phone number
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: email
+          in: query
+          description: Email of user
+          required: false
+          schema:
+            type: string
+            example: "amirhossein.pdn@gmail.com"
+            format: email
+        - name: phone_number
+          in: query
+          description: Phone number of user
+          required: false
+          schema:
+            type: string
+            example: "09202400120"
+            pattern: ^0\d{10}$
+        - name: user_type
+          in: query
+          description: User Type of user
+          required: true
+          schema:
+            type: string
+            example: "admin"
+            enum: [admin]
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TmpAuthAdminSignupKeyGetResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JwtUnauthorizedResponse"
+        "403":
+          description: Invalid Host
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidHostResponse"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TooManyRequestsResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+  /auth/{otpType}/otp:
+    get:
+      tags:
+        - auth
+      summary: Send OTP (3 r/m)
+      description: Send an OTP to user's phone number
+      parameters:
+        - name: otpType
+          in: path
+          description: Otp type
+          required: true
+          schema:
+            type: string
+            example: "sign-up"
+            enum:
+              [
+                sign-up,
+                sign-in,
+                change-password,
+                change-phone,
+                delete-account,
+                change-recovery-email,
+              ]
+        - name: username
+          in: query
+          required: true
+          description: Username to check
+          schema:
+            type: string
+            example: "Kasra"
+            pattern: ^(?!.*\.\.)[a-zA-Z0-9\-_]+(\.[a-zA-Z0-9\-_]+)*$
+            minLength: 3
+            maxLength: 64
+        - name: send_to_email
+          in: query
+          description: Send to email of user
+          required: false
+          schema:
+            type: boolean
+            example: false
+        - name: send_to_phone
+          in: query
+          description: Send to phone number of user
+          required: false
+          schema:
+            type: boolean
+            example: false
+        - name: user_type
+          in: query
+          description: User Type of user
+          required: true
+          schema:
+            type: string
+            example: "client"
+            enum: [client, admin]
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthMethodOtpGetResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/UserHasNotSetEmailResponse"
+                  - $ref: "#/components/schemas/UserHasNotSetPhoneNumberResponse"
+                  - $ref: "#/components/schemas/BadRequestResponse"
+        "403":
+          description: Invalid Host
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidHostResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsernameNotFoundResponse"
+        "409":
+          description: Username already exists Or PhoneNumber Or Email is taken by multiple users
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/UsernameAlreadyExistsResponse"
+                  - $ref: "#/components/schemas/EmailIsTakenByMultipleResponse"
+                  - $ref: "#/components/schemas/PhoneNumberIsTakenByMultipleResponse"
+        "410":
+          description: User has been deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDeletedResponse"
+        "429":
+          description: Too Early Or Too many requests
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/AuthMethodOtpGetTooEarlyResponse"
+                  - $ref: "#/components/schemas/TooManyRequestsResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+  /auth/tmp/{otpType}/otp:
+    get:
+      tags:
+        - auth
+      summary: Get Send OTP (3 r/m)
+      description: Get send an OTP to user's phone number
+      parameters:
+        - name: otpType
+          in: path
+          description: Otp type
+          required: true
+          schema:
+            type: string
+            example: "sign-up"
+            enum:
+              [
+                sign-up,
+                sign-in,
+                change-password,
+                change-phone,
+                delete-account,
+                change-recovery-email,
+              ]
+        - name: username
+          in: query
+          required: true
+          description: Username to check
+          schema:
+            type: string
+            example: "Kasra"
+            pattern: ^(?!.*\.\.)[a-zA-Z0-9\-_]+(\.[a-zA-Z0-9\-_]+)*$
+            minLength: 3
+            maxLength: 64
+        - name: send_to_email
+          in: query
+          description: Send to email of user
+          required: false
+          schema:
+            type: boolean
+            example: false
+        - name: send_to_phone
+          in: query
+          description: Send to phone number of user
+          required: false
+          schema:
+            type: boolean
+            example: false
+        - name: user_type
+          in: query
+          description: User Type of user
+          required: true
+          schema:
+            type: string
+            example: "client"
+            enum: [client, admin]
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TmpAuthMethodOtpGetResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        "403":
+          description: Invalid Host
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidHostResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsernameNotFoundResponse"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TooManyRequestsResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+  /auth/signup:
+    post:
+      tags:
+        - auth
+      summary: Signup using OTP (10 r/m)
+      description: Signup using OTP which has been sent to user's phone number
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthSignupPostRequest"
+      responses:
+        "200":
+          description: Successful Login
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Login"
+        "400":
+          description: Bad request or Bad Avatar
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/BadRequestResponse"
+                  - $ref: "#/components/schemas/BadAvatarResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenIncorrectResponse"
+        "403":
+          description: Invalid Host
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidHostResponse"
+        "409":
+          description: Username already exists Or PhoneNumber Or Email is taken by multiple users
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/UsernameAlreadyExistsResponse"
+                  - $ref: "#/components/schemas/EmailIsTakenByMultipleResponse"
+                  - $ref: "#/components/schemas/PhoneNumberIsTakenByMultipleResponse"
+        "415":
+          description: Unsupported media type
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnsupportedMediaTypeResponse"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TooManyRequestsResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+  /auth/signin:
+    post:
+      tags:
+        - auth
+      summary: Signin using OTP (10 r/m)
+      description: Signin using OTP
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthSigninPostRequest"
+      responses:
+        "200":
+          description: Successful Login
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Login"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenIncorrectResponse"
+        "403":
+          description: Invalid Host
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidHostResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsernameNotFoundResponse"
+        "410":
+          description: User has been deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDeletedResponse"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TooManyRequestsResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+  /auth/signin/password:
+    post:
+      tags:
+        - auth
+      summary: Signin using password (10 r/m)
+      description: Signin using password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthSigninPasswordPostRequest"
+      responses:
+        "200":
+          description: Successful Login
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Login"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PasswordIncorrectResponse"
+        "403":
+          description: Invalid Host
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidHostResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsernameNotFoundResponse"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TooManyRequestsResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+  /auth/logout:
+    post:
+      tags:
+        - auth
+      summary: Logout (10 r/m)
+      description: Logout
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful Logout
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JwtUnauthorizedResponse"
+        "403":
+          description: Invalid Host
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidHostResponse"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TooManyRequestsResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+  /auth/refresh:
+    post:
+      tags:
+        - auth
+      summary: Refresh access token (10 r/m)
+      description: Refresh access token
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthRefreshPostResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JwtUnauthorizedResponse"
+        "403":
+          description: Invalid Host
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidHostResponse"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TooManyRequestsResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+  /auth/reset-password:
+    post:
+      tags:
+        - auth
+      summary: Reset password (5 r/m)
+      description: Reset password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthResetPasswordPostRequest"
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Login"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        "403":
+          description: Invalid Host
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidHostResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserNotFoundResponse"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TooManyRequestsResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+  /auth/reset-phone:
+    post:
+      tags:
+        - auth
+      summary: Reset phone number (5 r/m)
+      description: Reset phone number
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthResetPhonePostRequest"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JwtUnauthorizedResponse"
+        "403":
+          description: Invalid Host
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidHostResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserNotFoundResponse"
+        "409":
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsernameAlreadyExistsResponse"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TooManyRequestsResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+  /auth/reset-email:
+    post:
+      tags:
+        - auth
+      summary: Reset email (5 r/m)
+      description: Reset email
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthResetEmailPostRequest"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JwtUnauthorizedResponse"
+        "403":
+          description: Invalid Host
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidHostResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserNotFoundResponse"
+        "409":
+          description: Email is taken
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/EmailIsTakenByMultipleResponse"
+                  - $ref: "#/components/schemas/PhoneNumberIsTakenByMultipleResponse"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TooManyRequestsResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+  /s3/avatars/{user_type}/{id}.png:
+    get:
+      tags:
+        - s3
+      summary: Get avatar (20 r/m)
+      description: Get avatar
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Avatar ID
+          schema:
+            type: string
+            example: "f4f6a6b8-d625-44f7-befd-e10fd47705fd"
+            format: uuid
+        - name: user_type
+          in: path
+          required: true
+          description: User Type of user
+          schema:
+            type: string
+            example: "client"
+            enum: [client, admin]
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        "403":
+          description: Invalid Host
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidHostResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsernameNotFoundResponse"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TooManyRequestsResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+  /user:
+    get:
+      tags:
+        - user
+      summary: Get user profile (10 r/m)
+      description: Get user profile
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: User ID
+          schema:
+            type: string
+            example: "f4f6a6b8-d625-44f7-befd-e10fd47705fd"
+            format: uuid
+        - name: user_type
+          in: query
+          required: true
+          description: User Type of user
+          schema:
+            type: string
+            example: "client"
+            enum: [client, admin]
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JwtUnauthorizedResponse"
+        "403":
+          description: Invalid Host
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidHostResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsernameNotFoundResponse"
+        "410":
+          description: User has been deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDeletedResponse"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TooManyRequestsResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+    put:
+      tags:
+        - user
+      summary: Update user profile (10 r/m)
+      description: Update user profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUserPutRequest"
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserUserPutResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/BadRequestResponse"
+                  - $ref: "#/components/schemas/BadAvatarResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JwtUnauthorizedResponse"
+        "403":
+          description: Invalid Host
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidHostResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserNotFoundResponse"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TooManyRequestsResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+    delete:
+      tags:
+        - user
+      summary: Delete user profile (10 r/m)
+      description: Delete user profile (token is optional because of admin previlages)
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUserDeleteRequest"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JwtUnauthorizedResponse"
+        "403":
+          description: Invalid Host
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidHostResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserNotFoundResponse"
+        "410":
+          description: User has been deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDeletedResponse"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TooManyRequestsResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    AuthCheckPostResponse:
+      type: object
+      required:
+        - exists
+        - deleted
+        - has_email
+        - has_phone_number
+        - has_password
+      properties:
+        exists:
+          type: boolean
+          example: true
+        deleted:
+          type: boolean
+          example: false
+        has_email:
+          type: boolean
+          example: false
+        has_phone_number:
+          type: boolean
+          example: false
+        has_password:
+          type: boolean
+          example: false
+    TmpAuthAdminSignupKeyGetResponse:
+      type: object
+      required:
+        - key
+      properties:
+        key:
+          type: string
+          example: "sH2@jsHH"
+          pattern: ^[a-zA-Z0-9!@#$%^&*()-_=+]{8}$
+    AuthMethodOtpGetResponse:
+      type: object
+      required:
+        - masked_email
+        - masked_phone
+      properties:
+        masked_email:
+          type: string
+          example: "22...@example.com"
+          format: email
+        masked_phone:
+          type: string
+          example: "092024....1"
+    TmpAuthMethodOtpGetResponse:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          example: "12345"
+          pattern: ^\d{5}$
+    AuthSignupPostRequest:
+      type: object
+      required:
+        - username
+        - name
+        - user_type
+        - token
+      properties:
+        username:
+          type: string
+          example: "Kasra"
+          pattern: ^(?!.*\.\.)[a-zA-Z0-9\-_]+(\.[a-zA-Z0-9\-_]+)*$
+          minLength: 3
+          maxLength: 64
+        name:
+          type: string
+          example: "John"
+          pattern: ^[\x{0600}-\x{06FF}\x{FB50}-\x{FDFF}a-zA-Z\s-]{2,250}$
+        avatar:
+          type: string
+          example: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPoAAAD6CAIAAAAHjs1qAAAB70lEQVR42uzSAQkAAAjEQBH7V9Ye/l2EsdmCFC0Bdge7g93B7mB3sDvYHewOdge7g92xO9gd7A52B7uD3cHuYHewO9gd7I7dwe5gd7A72B3sDnYHu4Pdwe5gd+wOdge7g93B7mB3sDvYHewOdge7Y3ewO9gd7A52B7uD3cHuYHewO9gd7I7dwe5gd7A72B3sDnYHu4Pdwe5gd+wOdge7g93B7mB3sDvYHewOdge7Y3ewO9gd7A52B7uD3cHuYHewO9gdu4Pdwe5gd7A72B3sDnYHu4Pdwe7YHewOdge7g93B7mB3sDvYHewOdge7Y3ewO9gd7A52B7uD3cHuYHewO9gdu4Pdwe5gd7A72B3sDnYHu4Pdwe7YHewOdge7g93B7mB3sDvYHewOdsfuYHewO9gd7A52B7uD3cHuYHewO9gdu4Pdwe5gd7A72B3sDnYHu4Pdwe7YHewOdge7g93B7mB3sDvYHewOdsfuYHewO9gd7A52B7uD3cHuYHewO3YHu4Pdwe5gd7A72B3sDnYHu4PdsTvYHewOdge7g93B7mB3sDvYHewOdsfuYHewO9gd7A52B7uD3cHuYHewO3YHu4Pdwe5gd7A72B3sDnYHu4PdsTvYHewOdge7g93B7mB3sDvYHeyO3cHu8MsFAAD//4g9AvbaMQNEAAAAAElFTkSuQmCC"
+          format: base64
+          description: Base64-encoded JPG or JPG 250x250px image
+        phone_number:
+          type: string
+          example: "09202400120"
+          pattern: ^0\d{10}$
+        email:
+          type: string
+          example: "amirhossein.pdn@gmail"
+          pattern: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+        user_type:
+          type: string
+          example: "client"
+          enum: [admin, client]
+        password:
+          type: string
+          example: "P@ssw0rdUnhackable"
+          pattern: ^(?=.*[A-Z])(?=.*[0-9])(?=.*[\W_]).{8,100}$
+        token:
+          type: string
+          example: "12345"
+          pattern: ^\d{5}$
+        key:
+          type: string
+          example: "sH2@jsHH"
+          description: Only for admin signup
+          pattern: ^[a-zA-Z0-9!@#$%^&*()-_=+]{8}$
+
+    AuthSigninPostRequest:
+      type: object
+      required:
+        - username
+        - user_type
+        - token
+      properties:
+        username:
+          type: string
+          example: "Kasra"
+          pattern: ^(?!.*\.\.)[a-zA-Z0-9\-_]+(\.[a-zA-Z0-9\-_]+)*$
+          minLength: 3
+          maxLength: 64
+        sent_to_phone:
+          type: boolean
+          example: true
+        sent_to_email:
+          type: boolean
+          example: false
+        user_type:
+          type: string
+          example: "client"
+          enum: [admin, client]
+        token:
+          type: string
+          example: "12345"
+          pattern: ^\d{5}$
+    AuthSigninPasswordPostRequest:
+      type: object
+      required:
+        - username
+        - user_type
+        - password
+      properties:
+        username:
+          type: string
+          example: "Kasra"
+          pattern: ^(?!.*\.\.)[a-zA-Z0-9\-_]+(\.[a-zA-Z0-9\-_]+)*$
+          minLength: 3
+          maxLength: 64
+        user_type:
+          type: string
+          example: "client"
+          enum: [admin, client]
+        password:
+          type: string
+          example: "P@ssw0rdUnhackable"
+          pattern: ^(?=.*[A-Z])(?=.*[0-9])(?=.*[\W_]).{8,100}$
+    AuthRefreshPostResponse:
+      type: object
+      required:
+        - access_token
+        - refresh_token
+        - access_expires
+        - refresh_expires
+      properties:
+        access_token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+        refresh_token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+        access_expires:
+          type: integer
+          example: 120
+        refresh_expires:
+          type: integer
+          example: 1440
+    AuthResetPasswordPostRequest:
+      type: object
+      required:
+        - username
+        - password
+        - user_type
+        - token
+      properties:
+        username:
+          type: string
+          example: "Kasra"
+          pattern: ^(?!.*\.\.)[a-zA-Z0-9\-_]+(\.[a-zA-Z0-9\-_]+)*$
+          minLength: 3
+          maxLength: 64
+        sent_to_phone:
+          type: boolean
+          example: true
+        sent_to_email:
+          type: boolean
+          example: false
+        password:
+          type: string
+          example: "P@ssw0rdUnhackable"
+          pattern: ^(?=.*[A-Z])(?=.*[0-9])(?=.*[\W_]).{8,100}$
+        user_type:
+          type: string
+          example: "client"
+          enum: [admin, client]
+        token:
+          type: string
+          example: "12345"
+          pattern: ^\d{5}$
+    AuthResetPhonePostRequest:
+      type: object
+      required:
+        - id
+        - phone_number
+        - user_type
+        - token
+      properties:
+        id:
+          type: string
+          example: "f4f6a6b8-d625-44f7-befd-e10fd47705fd"
+          format: uuid
+        phone_number:
+          type: string
+          example: "09202400120"
+          pattern: ^0\d{10}$
+        user_type:
+          type: string
+          example: "client"
+          enum: [admin, client]
+        token:
+          type: string
+          example: "12345"
+          pattern: ^\d{5}$
+    AuthResetEmailPostRequest:
+      type: object
+      required:
+        - id
+        - email
+        - user_type
+        - token
+      properties:
+        id:
+          type: string
+          example: "f4f6a6b8-d625-44f7-befd-e10fd47705fd"
+          format: uuid
+        email:
+          type: string
+          example: "amirhossein.pdn@gmail.com"
+          format: email
+          pattern: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+        user_type:
+          type: string
+          example: "client"
+          enum: [admin, client]
+        token:
+          type: string
+          example: "12345"
+          pattern: ^\d{5}$
+
+    UserUserPutRequest:
+      type: object
+      required:
+        - id
+        - username
+        - name
+        - avatar
+        - user_type
+      properties:
+        id:
+          type: string
+          example: "f4f6a6b8-d625-44f7-befd-e10fd47705fd"
+          format: uuid
+        username:
+          type: string
+          example: "Kasra"
+          pattern: ^(?!.*\.\.)[a-zA-Z0-9\-_]+(\.[a-zA-Z0-9\-_]+)*$
+          minLength: 3
+          maxLength: 64
+        name:
+          type: string
+          example: "John"
+          pattern: ^[\x{0600}-\x{06FF}\x{FB50}-\x{FDFF}a-zA-Z\s-]{2,250}$
+        avatar:
+          type: string
+          example: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPoAAAD6CAIAAAAHjs1qAAAB70lEQVR42uzSAQkAAAjEQBH7V9Ye/l2EsdmCFC0Bdge7g93B7mB3sDvYHewOdge7g92xO9gd7A52B7uD3cHuYHewO9gd7I7dwe5gd7A72B3sDnYHu4Pdwe5gd+wOdge7g93B7mB3sDvYHewOdge7Y3ewO9gd7A52B7uD3cHuYHewO9gd7I7dwe5gd7A72B3sDnYHu4Pdwe5gd+wOdge7g93B7mB3sDvYHewOdge7Y3ewO9gd7A52B7uD3cHuYHewO9gdu4Pdwe5gd7A72B3sDnYHu4Pdwe7YHewOdge7g93B7mB3sDvYHewOdge7Y3ewO9gd7A52B7uD3cHuYHewO9gdu4Pdwe5gd7A72B3sDnYHu4Pdwe7YHewOdge7g93B7mB3sDvYHewOdsfuYHewO9gd7A52B7uD3cHuYHewO9gdu4Pdwe5gd7A72B3sDnYHu4Pdwe7YHewOdge7g93B7mB3sDvYHewOdsfuYHewO9gd7A52B7uD3cHuYHewO3YHu4Pdwe5gd7A72B3sDnYHu4PdsTvYHewOdge7g93B7mB3sDvYHewOdsfuYHewO9gd7A52B7uD3cHuYHewO3YHu4Pdwe5gd7A72B3sDnYHu4PdsTvYHewOdge7g93B7mB3sDvYHeyO3cHu8MsFAAD//4g9AvbaMQNEAAAAAElFTkSuQmCC"
+          format: base64
+          description: Base64-encoded JPG or JPG 250x250px image
+        user_type:
+          type: string
+          example: "client"
+          enum: [admin, client]
+    UserUserPutResponse:
+      type: object
+      properties:
+        avatar:
+          type: string
+          example: "https://api.kasragay.com/v1/s3/avatars/client/f4f6a6b8-d625-44f7-befd-e10fd47705fd.png"
+          description: Url of avatar's image
+    UserUserDeleteRequest:
+      type: object
+      required:
+        - id
+        - user_type
+      properties:
+        id:
+          type: string
+          example: "f4f6a6b8-d625-44f7-befd-e10fd47705fd"
+          format: uuid
+        user_type:
+          type: string
+          example: "client"
+          enum: [admin, client]
+        token:
+          type: string
+          example: "12345"
+          pattern: ^\d{5}$
+
+    User:
+      type: object
+      required:
+        - id
+        - username
+        - name
+        - user_type
+      properties:
+        id:
+          type: string
+          example: "f4f6a6b8-d625-44f7-befd-e10fd47705fd"
+          format: uuid
+        username:
+          type: string
+          example: "Kasra"
+          pattern: ^(?!.*\.\.)[a-zA-Z0-9\-_]+(\.[a-zA-Z0-9\-_]+)*$
+          minLength: 3
+          maxLength: 64
+        name:
+          type: string
+          example: "John"
+          pattern: ^[\x{0600}-\x{06FF}\x{FB50}-\x{FDFF}a-zA-Z\s-]{2,250}$
+        avatar:
+          type: string
+          example: "https://api.kasragay.com/v1/s3/avatars/client/f4f6a6b8-d625-44f7-befd-e10fd47705fd.png"
+          description: Url of avatar's image
+        user_type:
+          type: string
+          example: "client"
+          enum: [admin, client]
+    Jwt:
+      type: object
+      required:
+        - access_token
+        - refresh_token
+        - access_expires
+        - refresh_expires
+      properties:
+        access_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzUwNDUxMDUsImlhdCI6MTczNDk1ODcwNSwiaWQiOiJmNGY2YTZiOC1kNjI1LTQ0ZjctYmVmZC1lMTBmZDQ3MDVmOWQiLCJyZWZlcmVzaCI6ZmFsc2UsInJvbGUiOiJjbGllbnQiLCJ1c2VybmFtZSI6IkNsaWVudCJ9.gyhv0v8JZcJKmjRc_3HIZ-hCBGCJfOu0m98Hu3dNsRQ'
+        refresh_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzUwNDUxMDUsImlhdCI6MTczNDk1ODcwNSwiaWQiOiJmNGY2YTZiOC1kNjI1LTQ0ZjctYmVmZC1lMTBmZDQ3MDVmOWQiLCJyZWZlcmVzaCI6ZmFsc2UsInJvbGUiOiJjbGllbnQiLCJ1c2VybmFtZSI6IkNsaWVudCJ9.gyhv0v8JZcJKmjRc_3HIZ-hCBGCJfOu0m98Hu3dNsRQ'
+        access_expires:
+          type: integer
+          example: 120
+        refresh_expires:
+          type: integer
+          example: 1440
+    Login:
+      type: object
+      required:
+        - user
+        - jwt
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        jwt:
+          $ref: "#/components/schemas/Jwt"
+
+    NotImplementedResponse:
+      type: object
+      required:
+        - status
+        - code
+        - message
+      properties:
+        status:
+          type: string
+          example: "error"
+          enum: [error]
+        code:
+          type: integer
+          example: 998
+          enum: [998]
+        message:
+          type: string
+          example: "not implemented"
+        reasons:
+          type: object
+          properties:
+            field1:
+              type: string
+              example: value1
+            field2:
+              type: string
+              example: value2
+        callers:
+          type: array
+          example: ["stack.svc1.method1", stack.svc2.method1, ...]
+    TooManyRequestsResponse:
+      type: object
+      required:
+        - status
+        - code
+        - message
+      properties:
+        status:
+          type: string
+          example: "error"
+          enum: [error]
+        code:
+          type: integer
+          example: 999
+          enum: [999]
+        message:
+          type: string
+          example: "too many requests"
+        callers:
+          type: array
+          example: ["stack.svc1.method1", stack.svc2.method1, ...]
+    InternalServerErrorResponse:
+      type: object
+      required:
+        - status
+        - code
+        - message
+      properties:
+        status:
+          type: string
+          example: "error"
+          enum: [error]
+        code:
+          type: integer
+          example: 1000
+          enum: [1000]
+        message:
+          type: string
+          example: "internal server error"
+    NotFoundResponse:
+      type: object
+      required:
+        - status
+        - code
+        - message
+      properties:
+        status:
+          type: string
+          example: "error"
+          enum: [error]
+        code:
+          type: integer
+          example: 1001
+          enum: [1001]
+        message:
+          type: string
+          example: "not found"
+        callers:
+          type: array
+          example: ["stack.svc1.method1", stack.svc2.method1, ...]
+    InvalidHostResponse:
+      type: object
+      required:
+        - status
+        - code
+        - message
+        - reasons
+      properties:
+        status:
+          type: string
+          example: "error"
+          enum: [error]
+        code:
+          type: integer
+          example: 1002
+          enum: [1002]
+        message:
+          type: string
+          example: "inavlid host"
+        reasons:
+          type: object
+          required:
+            - host
+          properties:
+            host:
+              type: string
+              example: "88.101.15.11:443"
+        callers:
+          type: array
+          example: ["stack.svc1.method1", stack.svc2.method1, ...]
+    UnsupportedMediaTypeResponse:
+      type: object
+      required:
+        - status
+        - code
+        - message
+        - reasons
+      properties:
+        status:
+          type: string
+          example: "error"
+          enum: [error]
+        code:
+          type: integer
+          example: 1003
+          enum: [1003]
+        message:
+          type: string
+          example: "unsupported media type"
+        reasons:
+          type: object
+          required:
+            - Content-Type
+          properties:
+            content-type:
+              type: string
+              example: application/xml
+        callers:
+          type: array
+          example: ["stack.svc1.method1", stack.svc2.method1, ...]
+    BadRequestResponse:
+      type: object
+      required:
+        - status
+        - code
+        - message
+      properties:
+        status:
+          type: string
+          example: "error"
+          enum: [error]
+        code:
+          type: integer
+          example: 1004
+          enum: [1004]
+        message:
+          type: string
+          example: "bad request"
+        reasons:
+          type: object
+          properties:
+            field1:
+              type: string
+              example: "value1"
+            field2:
+              type: string
+              example: "value2"
+
+        callers:
+          type: array
+          example: ["stack.svc1.method1", stack.svc2.method1, ...]
+    UsernameAlreadyExistsResponse:
+      type: object
+      required:
+        - status
+        - code
+        - message
+        - reasons
+      properties:
+        status:
+          type: string
+          example: "error"
+          enum: [error]
+        code:
+          type: integer
+          example: 1005
+          enum: [1005]
+        message:
+          type: string
+          example: "username already exists"
+        reasons:
+          type: object
+          properties:
+            phone_number:
+              type: string
+              example: "09202400120"
+              pattern: ^0\d{10}$
+            email:
+              type: string
+              example: "amirhossein.pdn@gmail.com"
+              pattern: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+        callers:
+          type: array
+          example: ["stack.svc1.method1", stack.svc2.method1, ...]
+    UserNotFoundResponse:
+      type: object
+      required:
+        - status
+        - code
+        - message
+        - reasons
+      properties:
+        status:
+          type: string
+          example: "error"
+          enum: [error]
+        code:
+          type: integer
+          example: 1006
+          enum: [1006]
+        message:
+          type: string
+          example: "user not found"
+        reasons:
+          type: object
+          properties:
+            id:
+              type: string
+              example: "f4f6a6b8-d625-44f7-befd-e10fd47705fd"
+              format: uuid
+            phone_number:
+              type: string
+              example: "09202400120"
+              pattern: ^0\d{10}$
+        callers:
+          type: array
+          example: ["stack.svc1.method1", stack.svc2.method1, ...]
+    UsernameNotFoundResponse:
+      type: object
+      required:
+        - status
+        - code
+        - message
+        - reasons
+      properties:
+        status:
+          type: string
+          example: "error"
+          enum: [error]
+        code:
+          type: integer
+          example: 1007
+          enum: [1007]
+        message:
+          type: string
+          example: "username not found"
+        reasons:
+          type: object
+          properties:
+            id:
+              type: string
+              example: "f4f6a6b8-d625-44f7-befd-e10fd47705fd"
+              format: uuid
+            phone_number:
+              type: string
+              example: "09202400120"
+              pattern: ^0\d{10}$
+        callers:
+          type: array
+          example: ["stack.svc1.method1", stack.svc2.method1, ...]
+    TokenIncorrectResponse:
+      type: object
+      required:
+        - status
+        - code
+        - message
+      properties:
+        status:
+          type: string
+          example: "error"
+          enum: [error]
+        code:
+          type: integer
+          example: 1008
+          enum: [1008]
+        message:
+          type: string
+          example: "token incorrect"
+        callers:
+          type: array
+          example: ["stack.svc1.method1", stack.svc2.method1, ...]
+    PasswordIncorrectResponse:
+      type: object
+      required:
+        - status
+        - code
+        - message
+      properties:
+        status:
+          type: string
+          example: "error"
+          enum: [error]
+        code:
+          type: integer
+          example: 1009
+          enum: [1009]
+        message:
+          type: string
+          example: "password incorrect"
+        callers:
+          type: array
+          example: ["stack.svc1.method1", stack.svc2.method1, ...]
+    JwtUnauthorizedResponse:
+      type: object
+      required:
+        - status
+        - code
+        - message
+      properties:
+        status:
+          type: string
+          example: "error"
+          enum: [error]
+        code:
+          type: integer
+          example: 1010
+          enum: [1010]
+        message:
+          type: string
+          example: "jwt unauthorized"
+        reasons:
+          type: object
+          properties:
+            type:
+              type: string
+              example: access
+              enum: [access, refresh]
+            wanted_type:
+              type: string
+              example: refresh
+              enum: [access, refresh]
+        callers:
+          type: array
+          example: ["stack.svc1.method1", stack.svc2.method1, ...]
+    AuthMethodOtpGetTooEarlyResponse:
+      type: object
+      required:
+        - status
+        - code
+        - message
+      properties:
+        status:
+          type: string
+          example: "error"
+          enum: [error]
+        code:
+          type: integer
+          example: 1011
+          enum: [1011]
+        message:
+          type: string
+          example: "otp get is called too early"
+        callers:
+          type: array
+          example: ["stack.svc1.method1", stack.svc2.method1, ...]
+    AuthSignupKeyIncorrectResponse:
+      type: object
+      required:
+        - status
+        - code
+        - message
+      properties:
+        status:
+          type: string
+          example: "error"
+          enum: [error]
+        code:
+          type: integer
+          example: 1012
+          enum: [1012]
+        message:
+          type: string
+          example: "signup key incorrect"
+        callers:
+          type: array
+          example: ["stack.svc1.method1", stack.svc2.method1, ...]
+    BadAvatarResponse:
+      type: object
+      required:
+        - status
+        - code
+        - message
+      properties:
+        status:
+          type: string
+          example: "error"
+          enum: [error]
+        code:
+          type: integer
+          example: 1013
+          enum: [1013]
+        message:
+          type: string
+          example: "bad avatar image"
+        reasons:
+          type: object
+          properties:
+            width:
+              type: integer
+              example: 5001
+            height:
+              type: integer
+              example: 5001
+            size:
+              type: integer
+              example: 10485761
+            max_width:
+              type: integer
+              example: 5000
+            max_height:
+              type: integer
+              example: 5000
+            max_size:
+              type: integer
+              example: 10485760
+            format:
+              type: string
+              example: "ai"
+            valid_formats:
+              type: array
+              example: "['jpg', 'jpeg', 'png']"
+            error:
+              type: string
+              example: "error decoding image"
+        callers:
+          type: array
+          example: ["stack.svc1.method1", stack.svc2.method1, ...]
+    UsernameIsTakenResponse:
+      type: object
+      required:
+        - status
+        - code
+        - message
+      properties:
+        status:
+          type: string
+          example: "error"
+          enum: [error]
+        code:
+          type: integer
+          example: 1014
+          enum: [1014]
+        message:
+          type: string
+          example: "username is taken"
+        callers:
+          type: array
+          example: ["stack.svc1.method1", stack.svc2.method1, ...]
+    UserDeletedResponse:
+      type: object
+      required:
+        - status
+        - code
+        - message
+      properties:
+        status:
+          type: string
+          example: "error"
+          enum: [error]
+        code:
+          type: integer
+          example: 1015
+          enum: [1015]
+        message:
+          type: string
+          example: "user has been deleted"
+        callers:
+          type: array
+          example: ["stack.svc1.method1", stack.svc2.method1, ...]
+    UserHasNotSetEmailResponse:
+      type: object
+      required:
+        - status
+        - code
+        - message
+      properties:
+        status:
+          type: string
+          example: "error"
+          enum: [error]
+        code:
+          type: integer
+          example: 1016
+          enum: [1016]
+        message:
+          type: string
+          example: "user has not set email"
+        callers:
+          type: array
+          example: ["stack.svc1.method1", stack.svc2.method1, ...]
+    UserHasNotSetPhoneNumberResponse:
+      type: object
+      required:
+        - status
+        - code
+        - message
+      properties:
+        status:
+          type: string
+          example: "error"
+          enum: [error]
+        code:
+          type: integer
+          example: 1017
+          enum: [1017]
+        message:
+          type: string
+          example: "user has not set phone number"
+        callers:
+          type: array
+          example: ["stack.svc1.method1", stack.svc2.method1, ...]
+    EmailIsTakenByMultipleResponse:
+      type: object
+      required:
+        - status
+        - code
+        - message
+      properties:
+        status:
+          type: string
+          example: "error"
+          enum: [error]
+        code:
+          type: integer
+          example: 1018
+          enum: [1018]
+        message:
+          type: string
+          example: "phone number is taken by multiple users"
+        reasons:
+          type: object
+          properties:
+            email:
+              type: string
+              example: "9sXb8@example.com"
+        callers:
+          type: array
+          example: ["stack.svc1.method1", stack.svc2.method1, ...]
+    PhoneNumberIsTakenByMultipleResponse:
+      type: object
+      required:
+        - status
+        - code
+        - message
+      properties:
+        status:
+          type: string
+          example: "error"
+          enum: [error]
+        code:
+          type: integer
+          example: 1019
+          enum: [1019]
+        message:
+          type: string
+          example: "phone number is taken by multiple users"
+        reasons:
+          type: object
+          properties:
+            email:
+              type: string
+              example: "9sXb8@example.com"
+        callers:
+          type: array
+          example: ["stack.svc1.method1", stack.svc2.method1, ...]

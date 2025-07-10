@@ -1,0 +1,50 @@
+name: Docker Build Push Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: prod
+    env:
+      APP: placeholder
+      VERSION: placeholder
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Extract APP and VERSION from commit message
+        id: extract
+        run: |
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+          APP=$(echo "$COMMIT_MESSAGE" | grep -oP '(?<=\[app=)[^\]]+' || echo "all")
+          VERSION=$(echo "$COMMIT_MESSAGE" | grep -oP '(?<=\[version=)[^\]]+' || echo "v1")
+          echo "APP=$APP" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Install SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Add server to known hosts
+        run: |
+          ssh-keyscan -p ${{ secrets.SSH_PORT }} -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: SSH and run deploy script
+        run: |
+          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+            cd vakilchat/backend
+            git pull
+            export APP=${{ env.APP }}
+            export VERSION=${{ env.VERSION }}
+            make docker-all
+          EOF
+        

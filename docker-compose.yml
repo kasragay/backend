@@ -1,0 +1,219 @@
+services:
+  gateway:
+    image: ghcr.io/kasragay/backend/gateway:${LONG_VERSION}
+    container_name: kg-gateway
+    restart: unless-stopped
+    ports:
+      - ${PORT}:${GATEWAY_PORT}
+    environment:
+      LONG_VERSION: ${LONG_VERSION}
+      VERSION: ${VERSION}
+
+      DEBUG: ${DEBUG}
+      DOMAIN: ${DOMAIN}
+      PORT: ${GATEWAY_PORT}
+      ADDITIONAL_ALLOWED_HOSTS: ${ADDITIONAL_ALLOWED_HOSTS}
+      ADDITIONAL_ALLOWED_ORIGINS: ${ADDITIONAL_ALLOWED_ORIGINS}
+
+      POSTGRES_DB_HOST: psql_bp
+      POSTGRES_DB_PORT: 5432
+      POSTGRES_DB_USERNAME: ${POSTGRES_DB_USERNAME}
+      POSTGRES_DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
+      POSTGRES_DB_DATABASE: ${POSTGRES_DB_DATABASE}
+
+      MONGO_HOST: mongodb
+      MONGO_PORT: 27017
+
+      DRAGONFLYDB_HOST: dragonfly
+      DRAGONFLYDB_PORT: 6379
+      DRAGONFLYDB_PASSWORD: ${DRAGONFLYDB_PASSWORD}
+
+
+      MINIO_USERNAME: ${MINIO_USERNAME}
+      MINIO_PASSWORD: ${MINIO_PASSWORD}
+      MINIO_HOST: minio
+      MINIO_PORT: 9000
+      MINIO_USE_SSL: ${MINIO_USE_SSL}
+      MINIO_AVATARS_BUCKET: ${MINIO_AVATARS_BUCKET}
+
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
+      NOREPLY_PHONE: ${NOREPLY_PHONE}
+
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      NOREPLY_EMAIL: ${NOREPLY_EMAIL}
+      NOREPLY_EMAIL_PASSWORD: ${NOREPLY_EMAIL_PASSWORD}
+      SUPPORT_EMAIL: ${SUPPORT_EMAIL}
+
+      
+      TLS_ON: ${TLS_ON}
+
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_ACCESS_EXP: ${JWT_ACCESS_EXP}
+      JWT_REFRESH_EXP: ${JWT_REFRESH_EXP}
+
+      PASSWORD_HASH_COST: ${PASSWORD_HASH_COST}
+      PASSWORD_HASH_SALT: ${PASSWORD_HASH_SALT}
+      USER_BACK_MAXIMUM_REFERENCE: ${USER_BACK_MAXIMUM_REFERENCE}
+    volumes:
+      - ./crt.pem:/etc/ssl/crt.pem
+      - ./key.pem:/etc/ssl/key.pem
+    healthcheck:
+      test: ["CMD", "curl", "-f", "https://api.${DOMAIN}/${VERSION}/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      user:
+        condition: service_healthy
+    networks:
+      - kasragay
+  user:
+    image: ghcr.io/kasragay/backend/user:${LONG_VERSION}
+    container_name: kg-user
+    restart: unless-stopped
+    environment:
+      LONG_VERSION: ${LONG_VERSION}
+      VERSION: ${VERSION}
+
+      DEBUG: $DEBUG
+      DOMAIN: ${DOMAIN}
+      PORT: ${USER_PORT}
+
+      POSTGRES_DB_HOST: psql_bp
+      POSTGRES_DB_PORT: 5432
+      POSTGRES_DB_USERNAME: ${POSTGRES_DB_USERNAME}
+      POSTGRES_DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
+      POSTGRES_DB_DATABASE: ${POSTGRES_DB_DATABASE}
+
+      MONGO_HOST: mongodb
+      MONGO_PORT: 27017
+
+      DRAGONFLYDB_HOST: dragonfly
+      DRAGONFLYDB_PORT: 6379
+      DRAGONFLYDB_PASSWORD: ${DRAGONFLYDB_PASSWORD}
+
+      MINIO_USERNAME: ${MINIO_USERNAME}
+      MINIO_PASSWORD: ${MINIO_PASSWORD}
+      MINIO_HOST: minio
+      MINIO_PORT: 9000
+      MINIO_USE_SSL: ${MINIO_USE_SSL}
+      MINIO_AVATARS_BUCKET: ${MINIO_AVATARS_BUCKET}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://user:${USER_PORT}/${VERSION}/user/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      psql_bp:
+        condition: service_healthy
+      dragonfly:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    networks:
+      - kasragay
+  dragonfly:
+    image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
+    container_name: kg-dragonfly
+    restart: unless-stopped
+    ulimits:
+      memlock: -1
+    environment:
+      DFLY_requirepass: ${DRAGONFLYDB_PASSWORD}
+    # ports:
+    #   - "${DRAGONFLYDB_PORT}:6379"
+    volumes:
+      - dragonfly_volume:/data
+    networks:
+      - kasragay
+  psql_bp:
+    image: postgres:latest
+    container_name: kg-psql_bp
+    restart: unless-stopped
+    # ports:
+    #   - "${POSTGRES_DB_PORT}:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB_DATABASE}
+      POSTGRES_USER: ${POSTGRES_DB_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_DB_PASSWORD}
+    volumes:
+      - psql_volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_DB_USERNAME} -d ${POSTGRES_DB_DATABASE}'"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - kasragay
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: kg-minio
+    ports:
+      - "${MINIO_PORT}:9000"
+      - "${MINIO_CONSOLE_PORT}:9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_USERNAME}
+      - MINIO_ROOT_PASSWORD=${MINIO_PASSWORD}
+    volumes:
+      - minio_volume:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - kasragay
+  mongodb:
+    image: mongo:8.0
+    container_name: kg-mongodb
+    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+    # ports:
+    #   - "${MONGO_PORT}:27017"
+    volumes:
+      - mongo_volume:/data/db
+      - mongoconf_volume:/data/configdb
+    networks:
+      - kasragay
+    healthcheck:
+      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongodb:27017'}]}) }" | mongosh --port 27017 --quiet
+      interval: 5s
+      timeout: 30s
+      start_period: 0s
+      start_interval: 1s
+      retries: 30
+    restart: unless-stopped
+  minio-client:
+    image: minio/mc:latest
+    container_name: kg-minio-client
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      until /usr/bin/mc alias set minio http://minio:9000 ${MINIO_USERNAME} ${MINIO_PASSWORD}; do
+        echo 'Waiting for MinIO to be ready...';
+        sleep 2;
+      done;
+      /usr/bin/mc mb minio/${MINIO_AVATARS_BUCKET} --ignore-existing;
+      /usr/bin/mc anonymous set download minio/${MINIO_AVATARS_BUCKET};
+      exit 0;
+      "
+    networks:
+      - kasragay
+
+volumes:
+  psql_volume:
+  dragonfly_volume:
+  minio_volume:
+  mongo_volume:
+  mongoconf_volume:
+
+networks:
+  kasragay:
+    driver: bridge
