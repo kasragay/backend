@@ -1,5 +1,5 @@
 <div style="display: flex; align-items: flex-end; margin-bottom: 20px">
-  <img src="https://api.kasragay.com/v1/assets/logo150x150.png" alt="Kasragay Logo" style="height: 50px; margin-right: 20px;">
+  <img src="https://api.kasragay.com/v1/assets/logo150x150.png" alt="Kasragay Logo" style="height: 150px; margin-right: 20px;">
   <h1 style="position: relative; top: 16px;">Kasragay Social Media</h1>
 </div>
 
