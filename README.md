@@ -1,6 +1,16 @@
-# Kasragay API
+# Kasragay [API](https://api.kasragay.com)
 
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+
+---
+
+## Docs
+### Latest Version
+[![V1 Swagger Doc](https://img.shields.io/badge/Swagger-Doc-green)](https://api.kasragay.com/v1)
+
+### V1 
+
+[![V1 Swagger Doc](https://img.shields.io/badge/Swagger-Doc-green)](https://api.kasragay.com/v1)
 
 
 ## Commands
@@ -82,7 +92,7 @@ MINIO_AVATARS_BUCKET=<string>
 
 TWILIO_ACCOUNT_SID=<string>
 TWILIO_AUTH_TOKEN=<string>
-NOREPLY_PHONE=0742692xxxx
+NOREPLY_PHONE=+44742692xxxx
 
 SMTP_HOST=smtpout.secureserver.net
 SMTP_PORT=587

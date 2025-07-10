@@ -20,8 +20,6 @@ type Telecom struct {
 	client  *twilio.RestClient
 }
 
-func zeroTo44(phone string) string { return "+44" + phone[1:] }
-
 func NewTelecomService(logger *utils.Logger) ports.TelecomService {
 	noReplyPhone := os.Getenv("NOREPLY_PHONE")
 	if noReplyPhone == "" {
@@ -44,7 +42,7 @@ func NewTelecomService(logger *utils.Logger) ports.TelecomService {
 	})
 	return &Telecom{
 		logger:  logger,
-		noReply: zeroTo44(noReplyPhone),
+		noReply: noReplyPhone,
 		client:  client,
 	}
 }
@@ -86,12 +84,12 @@ func (s *Telecom) NoReplySend(ctx context.Context, dst []string, message string)
 
 func (s *Telecom) send(ctx context.Context, src, dst, message string) (err error) {
 	defer func() { err = utils.FuncPipe(telecomCaller+".send", err) }()
-	// TODO: Delete this shit :)
-	if dst[:10] == "0920240012" {
+	// TODO_DEL
+	if dst[:11] == "+98920240012" {
 		return
 	}
 	params := &twilioApi.CreateMessageParams{}
-	params.SetTo(zeroTo44(dst))
+	params.SetTo(dst)
 	params.SetFrom(src)
 	params.SetBody(message)
 

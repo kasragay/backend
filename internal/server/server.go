@@ -70,13 +70,13 @@ func NewAbstractServer(serviceName ports.ServiceName) *AbstractServer {
 	cache := repository.NewCacheRepo(logger)
 	rel := repository.NewRelationalRepo(logger)
 	if serviceName == ports.GatewayServiceName {
-		if err := rel.TODO_DELETE_DropTables(); err != nil {
+		if err := rel.DropTables(); err != nil { // TODO_DEL
 			logger.Fatalf(context.Background(), "Failed to drop tables: %v", err)
 		}
 		if err := rel.AutoMigrate(); err != nil {
 			logger.Fatalf(context.Background(), "Failed to migrate database: %v", err)
 		}
-		if err := rel.TODO_DELETE_AddFirstUsers(); err != nil {
+		if err := rel.AddFirstUsers(); err != nil { // TODO_DEL
 			logger.Fatalf(context.Background(), "Failed to add first users: %v", err)
 		}
 	}

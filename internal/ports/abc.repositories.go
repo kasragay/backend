@@ -27,8 +27,8 @@ type RelationalRepo interface {
 
 	Close() error
 
-	TODO_DELETE_DropTables() error
-	TODO_DELETE_AddFirstUsers() error
+	DropTables() error
+	AddFirstUsers() error // TODO_DEL
 	AutoMigrate() error
 }
 

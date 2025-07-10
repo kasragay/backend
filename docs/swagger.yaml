@@ -4,10 +4,10 @@ info:
   description: |-
     ## Notes 
     ---
-    - **09202400120** phone number is signed up by default as admin, and client.
+    - **+989202400120** phone number is signed up by default as admin, and client.
       - **Admin ID** 89950e97-6b0f-4ef4-977a-8378b14bc4a7
       - **Client ID** 779033a2-4eaa-4817-aa81-24e24bd419f5
-    - **09202400120-9** phone numbers are by-passed and available for testing.
+    - **+989202400120-9** phone numbers are by-passed and available for testing.
 
     ### Logs
     ---
@@ -114,8 +114,8 @@ paths:
           required: false
           schema:
             type: string
-            example: "09202400120"
-            pattern: ^0\d{10}$
+            example: "+989202400120"
+            pattern: ^\+[1-9]\d{10,14}$
         - name: user_type
           in: query
           description: User Type of user
@@ -197,8 +197,8 @@ paths:
           required: false
           schema:
             type: string
-            example: "09202400120"
-            pattern: ^0\d{10}$
+            example: "+989202400120"
+            pattern: ^\+[1-9]\d{10,14}$
         - name: user_type
           in: query
           description: User Type of user
@@ -1216,8 +1216,8 @@ components:
           description: Base64-encoded JPG or JPG 250x250px image
         phone_number:
           type: string
-          example: "09202400120"
-          pattern: ^0\d{10}$
+          example: "+989202400120"
+          pattern: ^\+[1-9]\d{10,14}$
         email:
           type: string
           example: "amirhossein.pdn@gmail"
@@ -1354,8 +1354,8 @@ components:
           format: uuid
         phone_number:
           type: string
-          example: "09202400120"
-          pattern: ^0\d{10}$
+          example: "+989202400120"
+          pattern: ^\+[1-9]\d{10,14}$
         user_type:
           type: string
           example: "client"
@@ -1714,8 +1714,8 @@ components:
           properties:
             phone_number:
               type: string
-              example: "09202400120"
-              pattern: ^0\d{10}$
+              example: "+989202400120"
+              pattern: ^\+[1-9]\d{10,14}$
             email:
               type: string
               example: "amirhossein.pdn@gmail.com"
@@ -1751,8 +1751,8 @@ components:
               format: uuid
             phone_number:
               type: string
-              example: "09202400120"
-              pattern: ^0\d{10}$
+              example: "+989202400120"
+              pattern: ^\+[1-9]\d{10,14}$
         callers:
           type: array
           example: ["stack.svc1.method1", stack.svc2.method1, ...]
@@ -1784,8 +1784,8 @@ components:
               format: uuid
             phone_number:
               type: string
-              example: "09202400120"
-              pattern: ^0\d{10}$
+              example: "+989202400120"
+              pattern: ^\+[1-9]\d{10,14}$
         callers:
           type: array
           example: ["stack.svc1.method1", stack.svc2.method1, ...]
