@@ -1,10 +1,10 @@
 # Details
 
-Date : 2025-07-10 04:58:49
+Date : 2025-07-10 07:12:47
 
 Directory /home/yuhaha/kasragay/backend
 
-Total : 58 files,  7931 codes, 170 comments, 762 blanks, all 8863 lines
+Total : 58 files,  7937 codes, 171 comments, 765 blanks, all 8873 lines
 
 [Summary](results.md) / Details / [Diff Summary](diff.md) / [Diff Details](diff-details.md)
 
@@ -15,7 +15,7 @@ Total : 58 files,  7931 codes, 170 comments, 762 blanks, all 8863 lines
 | [Dockerfiles/gateway](/Dockerfiles/gateway) | (Unsupported) | 0 | 0 | 0 | 0 |
 | [Dockerfiles/user](/Dockerfiles/user) | (Unsupported) | 0 | 0 | 0 | 0 |
 | [Makefile](/Makefile) | Makefile | 148 | 0 | 27 | 175 |
-| [README.md](/README.md) | Markdown | 125 | 0 | 43 | 168 |
+| [README.md](/README.md) | Markdown | 135 | 0 | 48 | 183 |
 | [assets/favicon.ico](/assets/favicon.ico) | (Unsupported) | 0 | 0 | 0 | 0 |
 | [assets/favicon16x16.ico](/assets/favicon16x16.ico) | (Unsupported) | 0 | 0 | 0 | 0 |
 | [assets/favicon32x32.ico](/assets/favicon32x32.ico) | (Unsupported) | 0 | 0 | 0 | 0 |
@@ -38,7 +38,7 @@ Total : 58 files,  7931 codes, 170 comments, 762 blanks, all 8863 lines
 | [internal/ports/io.auth.go](/internal/ports/io.auth.go) | Go | 126 | 0 | 28 | 154 |
 | [internal/ports/io.user.go](/internal/ports/io.user.go) | Go | 30 | 0 | 7 | 37 |
 | [internal/ports/models.user.go](/internal/ports/models.user.go) | Go | 201 | 0 | 31 | 232 |
-| [internal/ports/validations.go](/internal/ports/validations.go) | Go | 272 | 1 | 32 | 305 |
+| [internal/ports/validations.go](/internal/ports/validations.go) | Go | 269 | 1 | 32 | 302 |
 | [internal/repository/cache.go](/internal/repository/cache.go) | Go | 107 | 0 | 16 | 123 |
 | [internal/repository/consts.go](/internal/repository/consts.go) | Go | 4 | 0 | 2 | 6 |
 | [internal/repository/mongo.go](/internal/repository/mongo.go) | Go | 46 | 0 | 9 | 55 |
@@ -56,11 +56,11 @@ Total : 58 files,  7931 codes, 170 comments, 762 blanks, all 8863 lines
 | [internal/server/user/consts.go](/internal/server/user/consts.go) | Go | 4 | 0 | 2 | 6 |
 | [internal/server/user/routes.go](/internal/server/user/routes.go) | Go | 93 | 0 | 12 | 105 |
 | [internal/server/user/server.go](/internal/server/user/server.go) | Go | 24 | 0 | 5 | 29 |
-| [internal/services/auth.go](/internal/services/auth.go) | Go | 564 | 1 | 47 | 612 |
+| [internal/services/auth.go](/internal/services/auth.go) | Go | 564 | 1 | 46 | 611 |
 | [internal/services/consts.go](/internal/services/consts.go) | Go | 4 | 0 | 2 | 6 |
-| [internal/services/mailcom.go](/internal/services/mailcom.go) | Go | 171 | 6 | 19 | 196 |
+| [internal/services/mailcom.go](/internal/services/mailcom.go) | Go | 171 | 7 | 19 | 197 |
 | [internal/services/ratelimiter.go](/internal/services/ratelimiter.go) | Go | 262 | 0 | 28 | 290 |
-| [internal/services/telecom.go](/internal/services/telecom.go) | Go | 120 | 1 | 18 | 139 |
+| [internal/services/telecom.go](/internal/services/telecom.go) | Go | 119 | 1 | 17 | 137 |
 | [internal/services/user.go](/internal/services/user.go) | Go | 92 | 0 | 10 | 102 |
 | [internal/utils/consts.go](/internal/utils/consts.go) | Go | 2 | 0 | 2 | 4 |
 | [internal/utils/error.go](/internal/utils/error.go) | Go | 255 | 16 | 30 | 301 |
