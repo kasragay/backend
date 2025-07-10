@@ -104,9 +104,10 @@ func (s *Mailcom) NoReplySend(ctx context.Context, dst []string, subject, messag
 
 func (s *Mailcom) send(ctx context.Context, src [2]string, dst, subject, htmlBody string) (err error) {
 	defer func() { err = utils.FuncPipe(mailcomCaller+".send", err) }()
+	// TODO_DEL
 	if true {
 		return nil
-	} // TODO: REMOVE
+	}
 	m := gomail.NewMessage()
 	m.SetHeader("From", src[0])
 	m.SetHeader("To", dst)

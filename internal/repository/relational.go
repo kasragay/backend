@@ -81,14 +81,14 @@ func NewRelationalRepo(logger *utils.Logger) ports.RelationalRepo {
 	}
 }
 
-func (s *Relational) TODO_DELETE_DropTables() error {
+func (s *Relational) DropTables() error {
 	return s.client.Migrator().DropTable(
 		&ports.AdminUserModel{},
 		&ports.ClientUserModel{},
 	)
 }
 
-func (s *Relational) TODO_DELETE_AddFirstUsers() error {
+func (s *Relational) AddFirstUsers() error {
 	_, err := s.CreateUser(
 		context.Background(),
 		&ports.AuthSignupPostRequest{

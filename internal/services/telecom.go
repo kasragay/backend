@@ -84,7 +84,7 @@ func (s *Telecom) NoReplySend(ctx context.Context, dst []string, message string)
 
 func (s *Telecom) send(ctx context.Context, src, dst, message string) (err error) {
 	defer func() { err = utils.FuncPipe(telecomCaller+".send", err) }()
-	// TODO: Delete this shit :)
+	// TODO_DEL
 	if dst[:11] == "+98920240012" {
 		return
 	}

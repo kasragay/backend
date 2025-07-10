@@ -157,7 +157,7 @@ func (s *GatewayServer) register(
 	if hasAuthMiddleware && len(middlewares) == 0 {
 		s.Logger().Fatalf(context.Background(), "auth middleware is not set for: %s", method)
 	}
-	token = token * 10 // TODO: DELETE THIS
+	token = token * 10 // TODO_DEL
 	newMiddlewares := make([]fiber.Handler, 0, len(middlewares)+2)
 	ratelimiter := s.ratelimiter.Handler(routerName, method, path, token, duration, onIP, onID)
 	if hasAuthMiddleware {
