@@ -1,0 +1,20 @@
+FROM golang:1.24-alpine AS build
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN go build -o bin/app cmd/post/main.go
+
+FROM alpine:3.20.1 AS prod
+
+RUN apk add --no-cache curl
+RUN apk add --no-cache tzdata
+WORKDIR /app
+
+COPY templates ./templates
+COPY --from=build /app/bin/app /app/bin/app
+
+EXPOSE ${POST_PORT}
+
+CMD ["./bin/app"]

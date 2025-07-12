@@ -1,6 +1,6 @@
 APP ?= all
 LONG_VERSION ?= v1.0.0
-ALL_APPS_NAMES = gateway user
+ALL_APPS_NAMES = gateway user post
 ifeq ($(APP), all)
 	APPS = $(ALL_APPS_NAMES)
 else

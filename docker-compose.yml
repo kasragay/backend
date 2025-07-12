@@ -67,6 +67,8 @@ services:
     depends_on:
       user:
         condition: service_healthy
+      post:
+        condition: service_healthy
     networks:
       - kasragay
   user:
@@ -116,6 +118,54 @@ services:
         condition: service_healthy
     networks:
       - kasragay
+  post:
+    image: ghcr.io/kasragay/backend/post:${LONG_VERSION}
+    container_name: kg-post
+    restart: unless-stopped
+    environment:
+      LONG_VERSION: ${LONG_VERSION}
+      VERSION: ${VERSION}
+
+      DEBUG: $DEBUG
+      DOMAIN: ${DOMAIN}
+      PORT: ${POST_PORT}
+
+      POSTGRES_DB_HOST: psql_bp
+      POSTGRES_DB_PORT: 5432
+      POSTGRES_DB_USERNAME: ${POSTGRES_DB_USERNAME}
+      POSTGRES_DB_PASSWORD: ${POSTGRES_DB_PASSWORD}
+      POSTGRES_DB_DATABASE: ${POSTGRES_DB_DATABASE}
+
+      MONGO_HOST: mongodb
+      MONGO_PORT: 27017
+
+      DRAGONFLYDB_HOST: dragonfly
+      DRAGONFLYDB_PORT: 6379
+      DRAGONFLYDB_PASSWORD: ${DRAGONFLYDB_PASSWORD}
+
+      MINIO_USERNAME: ${MINIO_USERNAME}
+      MINIO_PASSWORD: ${MINIO_PASSWORD}
+      MINIO_HOST: minio
+      MINIO_PORT: 9000
+      MINIO_USE_SSL: ${MINIO_USE_SSL}
+      MINIO_AVATARS_BUCKET: ${MINIO_AVATARS_BUCKET}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://post:${POST_PORT}/${VERSION}/post/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      psql_bp:
+        condition: service_healthy
+      dragonfly:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    networks:
+      - kasragay
+ 
   dragonfly:
     image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
     container_name: kg-dragonfly
