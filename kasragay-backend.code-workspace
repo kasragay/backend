@@ -4,13 +4,37 @@
 			"path": "."
 		}
 	],
-
 	"settings": {
 		"window.title": "Kasragay Backend",
 		"files.exclude": {
 			"**/.git": true,
 			"**/**.pem": true,
 		},
-		"editor.formatOnSave": true
+		"editor.formatOnSave": true,
+		"[go]": {
+			"editor.semanticHighlighting.enabled": false
+		},
+		"editor.tokenColorCustomizations": {
+			"textMateRules": [
+				{
+					"scope": "meta.struct-tag.pair.go support.type.property-name.json", // struct tag key
+					"settings": {
+						"foreground": "#d383ff",
+					}
+				},
+				{
+					"scope": "meta.struct-tag.pair.go punctuation.separator.dictionary.key-value.json", // struct tag separator (colon)
+					"settings": {
+						"foreground": "#BCBEC4"
+					}
+				},
+				{
+					"scope": "meta.struct-tag.pair.go string.quoted.double.json", // struct tag value
+					"settings": {
+						"foreground": "#6a85ae",
+					}
+				}
+			]
+		}
 	},
 }

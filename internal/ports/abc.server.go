@@ -11,6 +11,7 @@ type ServiceName string
 const (
 	GatewayServiceName ServiceName = "gateway"
 	UserServiceName    ServiceName = "user"
+	PostServiceName    ServiceName = "post"
 )
 
 type Version string

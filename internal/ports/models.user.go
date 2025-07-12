@@ -66,6 +66,7 @@ type BaseUserModel struct {
 	PhoneNumber *string   `json:"phone_number"`
 	Email       *string   `json:"email"`
 	Password    *string   `json:"password"`
+	Posts       []Post    `json:"posts" gorm:"foreignKey:UserId;references:Id;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	UpdatedAt   time.Time `json:"updated_at" gorm:"not null"`
 	CreatedAt   time.Time `json:"created_at" gorm:"not null"`
 	IsDeleted   bool      `json:"is_deleted" gorm:"not null"`

@@ -14,6 +14,13 @@ type UserService interface {
 	UserDelete(ctx context.Context, req *UserUserDeleteRequest, tokenCheck bool) (err error)
 }
 
+type PostService interface {
+	PostGet(ctx context.Context, req *PostGetRequest) (resp *Post, err error)
+	PostPost(ctx context.Context, req *PostPostRequest) (resp *PostPostResponse, err error)
+	PostPut(ctx context.Context, req *PostPutRequest) (resp *PostPutResponse, err error)
+	PostDelete(ctx context.Context, req *PostDeleteRequest, tokenCheck bool) (err error)
+}
+
 type AuthService interface {
 	CheckPost(ctx context.Context, req *AuthCheckPostRequest) (resp *AuthCheckPostResponse, err error)
 	CheckById(ctx context.Context, id uuid.UUID, userType UserType) (exists bool, isDeleted bool, err error)
