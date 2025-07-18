@@ -2,9 +2,10 @@ package services
 
 import (
 	"context"
-
+	"github.com/google/uuid"
 	"github.com/kasragay/backend/internal/ports"
 	"github.com/kasragay/backend/internal/utils"
+	"time"
 )
 
 const postCaller = packageCaller + ".Post"
@@ -35,74 +36,101 @@ func NewPostService(
 
 // TODO: implement service methods
 func (s *Post) PostGet(ctx context.Context, req *ports.PostGetRequest) (resp *ports.Post, err error) {
-	// defer func() { err = utils.FuncPipe(postCaller+".PostGet", err) }()
-	// user, isDeleted, err := s.rel.GetPostById(ctx, req.Id, req.PostType)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// if isDeleted {
-	// 	return nil, utils.PostDeletedResponse.Clone()
-	// }
-	// return user.ToPost(), nil
-	return
+	defer func() { err = utils.FuncPipe(postCaller+".PostGet", err) }()
+	post, isDeleted, err := s.rel.GetPostById(ctx, req.Id)
+	if err != nil {
+		return nil, err
+	}
+	if isDeleted {
+		return nil, utils.PostDeletedResponse.Clone()
+	}
+	return &post, nil
 }
 
 func (s *Post) PostPost(ctx context.Context, req *ports.PostPostRequest) (resp *ports.PostPostResponse, err error) {
-	return
-}
-func (s *Post) PostPut(ctx context.Context, req *ports.PostPutRequest) (resp *ports.PostPutResponse, err error) {
-	// defer func() { err = utils.FuncPipe(postCaller+".PostPut", err) }()
+	defer func() { err = utils.FuncPipe(postCaller+".PostPost", err) }()
 
-	// img, err := ports.AvatarValidator(req.Avatar)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// if img == nil {
-	// 	if err := s.s3.DeleteAvatar(ctx, req.Id, req.PostType); err != nil {
-	// 		return nil, err
-	// 	}
-	// } else {
-	// 	if err := s.s3.UploadAvatar(ctx, req.Id, req.PostType, img); err != nil {
-	// 		return nil, err
-	// 	}
-	// }
-	// err = s.rel.UpdatePostProfileById(ctx, req.Id, req.Postname, req.Name, req.Avatar, req.PostType)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// return &ports.PostPostPutResponse{
-	// 	Avatar: ports.GetAvatarUrl(req.Id, req.PostType),
-	// }, nil
-	return
+	post := req.ToPost()
+	id, err := s.rel.CreatePost(ctx, post)
+	if err != nil {
+		return nil, err
+	}
+	post.Id = id
+	return &ports.PostPostResponse{
+		Id:        id,
+		CreatedAt: post.CreatedAt,
+	}, nil
+}
+func (s *Post) PostPut(ctx context.Context, req *ports.PostPutRequest) (err error) {
+	defer func() { err = utils.FuncPipe(postCaller+".PostPut", err) }()
+
+	err, done := s.checkForInvalidState(ctx, req.Id, err)
+	if done {
+		return err
+	}
+
+	updates := s.setUpdatedFields(req)
+
+	err = s.rel.UpdatePostById(ctx, req.Id, updates)
+	return err
 }
 
-func (s *Post) PostDelete(ctx context.Context, req *ports.PostDeleteRequest, tokenCheck bool) (err error) {
-	// defer func() { err = utils.FuncPipe(postCaller+".PostDelete", err) }()
-	// user, isDeleted, err := s.rel.GetPostById(ctx, req.Id, req.PostType)
-	// if err != nil {
-	// 	return err
-	// }
-	// if isDeleted {
-	// 	return utils.PostDeletedResponse.Clone()
-	// }
-	// if user.GetHasAvatar() {
-	// 	if err = s.s3.DeleteAvatar(ctx, req.Id, req.PostType); err != nil {
-	// 		return err
-	// 	}
-	// }
-	// if !tokenCheck {
-	// 	return s.rel.DeletePostById(ctx, req.Id, req.PostType)
-	// }
-	// cToken, err := s.cache.GetOtpToken(ctx, user.GetPhoneNumber(), ports.DeleteAccountOtpType, req.PostType)
-	// if err != nil {
-	// 	return err
-	// }
-	// if cToken != req.Token {
-	// 	return utils.TokenIncorrectResponse.Clone()
-	// }
-	// if err = s.cache.DeleteOtpToken(ctx, user.GetPhoneNumber(), ports.DeleteAccountOtpType, req.PostType); err != nil {
-	// 	return err
-	// }
-	// return s.rel.DeletePostById(ctx, req.Id, req.PostType)
-	return
+func (s *Post) checkForInvalidState(ctx context.Context, id uuid.UUID, err error) (error, bool) {
+	_, isDeleted, err := s.rel.GetPostById(ctx, id)
+	if err != nil {
+		return err, true
+	}
+	if isDeleted {
+		return utils.PostDeletedResponse.Clone(), true
+	}
+	return nil, false
+}
+
+func (s *Post) setUpdatedFields(req *ports.PostPutRequest) map[string]interface{} {
+	updates := make(map[string]interface{})
+
+	// Top-level fields
+	if req.Title != nil {
+		updates["title"] = *req.Title
+	}
+	if req.Flair != nil {
+		updates["flair"] = *req.Flair
+	}
+	if req.IsNSFW != nil {
+		updates["is_nsfw"] = *req.IsNSFW
+	}
+	if req.Spoiler != nil {
+		updates["spoiler"] = *req.Spoiler
+	}
+
+	// Handle nested PostBody
+	if req.Body != nil {
+		bodyUpdates := make(map[string]interface{})
+		if req.Body.QuoteId != nil {
+			bodyUpdates["quote_id"] = *req.Body.QuoteId
+		}
+		if req.Body.Text != nil {
+			bodyUpdates["text"] = req.Body.Text
+		}
+		if req.Body.Video != nil {
+			bodyUpdates["video"] = *req.Body.Video
+		}
+		updates["post_body"] = bodyUpdates
+	}
+
+	updates["updated_at"] = time.Now().UTC()
+	return updates
+}
+
+func (s *Post) PostDelete(ctx context.Context, id uuid.UUID) (err error) {
+	defer func() { err = utils.FuncPipe(postCaller+".PostDelete", err) }()
+
+	err, done := s.checkForInvalidState(ctx, id, err)
+	if done {
+		return err
+	}
+
+	err = s.rel.DeletePostById(ctx, id)
+
+	return err
 }

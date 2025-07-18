@@ -41,7 +41,7 @@ type Relational struct {
 	client *gorm.DB
 }
 
-func NewRelationalRepo(logger *utils.Logger) ports.RelationalRepo {
+func NewRelationalRepo(logger *utils.Logger) *ports.RelationalRepo {
 	database := os.Getenv("POSTGRES_DB_DATABASE")
 	if database == "" {
 		logger.Fatal(context.Background(), "POSTGRES_DB_DATABASE is not set")

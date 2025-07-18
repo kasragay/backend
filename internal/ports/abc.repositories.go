@@ -25,6 +25,11 @@ type RelationalRepo interface {
 	CheckUserEmailLimit(ctx context.Context, email string) (err error)
 	CheckUserPhoneLimit(ctx context.Context, phoneNumber string) (err error)
 
+	CreatePost(ctx context.Context, req *Post, forceId ...uuid.UUID) (postId uuid.UUID, err error)
+	GetPostById(ctx context.Context, id uuid.UUID) (post Post, isDeleted bool, err error)
+	UpdatePostById(ctx context.Context, postId uuid.UUID, fields map[string]any) (err error)
+	DeletePostById(ctx context.Context, id uuid.UUID) (err error)
+
 	Close() error
 
 	DropTables() error

@@ -17,8 +17,8 @@ type UserService interface {
 type PostService interface {
 	PostGet(ctx context.Context, req *PostGetRequest) (resp *Post, err error)
 	PostPost(ctx context.Context, req *PostPostRequest) (resp *PostPostResponse, err error)
-	PostPut(ctx context.Context, req *PostPutRequest) (resp *PostPutResponse, err error)
-	PostDelete(ctx context.Context, req *PostDeleteRequest, tokenCheck bool) (err error)
+	PostPut(ctx context.Context, req *PostPutRequest) (err error)
+	PostDelete(ctx context.Context, id uuid.UUID) (err error)
 }
 
 type AuthService interface {

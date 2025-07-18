@@ -53,6 +53,7 @@ const (
 	UserHasNotSetPhoneNumberAppCode
 	EmailIsTakenByMultipleAppCode
 	PhoneNumberIsTakenByMultipleAppCode
+	PostDeletedAppCode
 )
 
 var (
@@ -78,6 +79,7 @@ var (
 	UserHasNotSetPhoneNumberResponse     = NewError(http.StatusBadRequest, "user has not set phone number").WithAppCode(UserHasNotSetPhoneNumberAppCode)
 	EmailIsTakenByMultipleResponse       = NewError(http.StatusConflict, "email is taken by multiple users").WithAppCode(EmailIsTakenByMultipleAppCode)
 	PhoneNumberIsTakenByMultipleResponse = NewError(http.StatusConflict, "phone number is taken by multiple users").WithAppCode(PhoneNumberIsTakenByMultipleAppCode)
+	PostDeletedResponse                  = NewError(http.StatusGone, "post has been deleted").WithAppCode(PostDeletedAppCode)
 )
 
 type Error struct {
