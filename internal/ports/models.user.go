@@ -3,7 +3,6 @@ package ports
 import (
 	"context"
 	"errors"
-	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -13,17 +12,27 @@ import (
 
 var s3Prefix string
 
-func init() {
-	domain := os.Getenv("DOMAIN")
-	if domain == "" {
-		panic("DOMAIN is not set")
-	}
-	version := os.Getenv("VERSION")
-	if version == "" {
-		panic("VERSION is not set")
-	}
-	s3Prefix = "https://api." + domain + "/" + version + "/s3/avatars/"
-}
+// #TODO: it's make a Error
+// go run cmd/tui/main.go
+// panic: DOMAIN is not set
+
+// goroutine 1 [running]:
+// github.com/kasragay/backend/internal/ports.init.0()
+//         /home/arman/bemula/kasragay/internal/ports/models.user.go:19 +0xe8
+// exit status 2
+// make: *** [Makefile:177: tui] Error 1
+
+// func init() {
+// 	domain := os.Getenv("DOMAIN")
+// 	if domain == "" {
+// 		panic("DOMAIN is not set")
+// 	}
+// 	version := os.Getenv("VERSION")
+// 	if version == "" {
+// 		panic("VERSION is not set")
+// 	}
+// 	s3Prefix = "https://api." + domain + "/" + version + "/s3/avatars/"
+// }
 
 func GetAvatarUrl(id uuid.UUID, userType UserType) string {
 	return s3Prefix + string(userType) + "/" + id.String() + ".png"

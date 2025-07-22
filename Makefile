@@ -33,7 +33,7 @@ createsuperuser: build-settings
 .PHONY: deletesuperuser
 deletesuperuserbyid: build-settings
 	@./bin/settings deletesuperuser
-	
+
 .PHONY: docker-up
 docker-up:
 	@docker compose -p kg-back up -d
@@ -105,7 +105,7 @@ playground:
 	@echo "Running playground..."
 	@go build -o bin/playground cmd/playground/main.go
 	@./bin/playground
-		
+
 .PHONY: tidy
 tidy: clean
 	@go mod tidy
@@ -119,12 +119,12 @@ lint: tidy
 commit: lint
 	@git add .
 	@printf "%s\n[app=%s] [version=%s]" "$(M)" "$(APP)" "$(LONG_VERSION)" | git commit -F -
-	
+
 .PHONY: push
 push: commit
 	@git push
 
-.PHONY: compush 
+.PHONY: compush
 compush: commit push
 
 
@@ -173,3 +173,5 @@ docker-down-app-parallel:
 		) & \
 	done; \
 	wait
+tui:
+	go run cmd/tui/main.go
